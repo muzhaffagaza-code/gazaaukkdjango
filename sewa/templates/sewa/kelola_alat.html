@@ -1,0 +1,145 @@
+{% extends 'sewa/base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="hstack flex-wrap justify-content-between gap-2 mb-4 pb-3 border-bottom">
+        <h4 class="mb-0 fw-bold">Kelola Data Alat</h4>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambah">
+            + Tambah Alat
+        </button>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>No</th>
+                        <th>Foto</th>
+                        <th>Nama Alat</th>
+                        <th>Kategori</th>
+                        <th>Harga Sewa</th>
+                        <th>Stok</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alat in semua_alat %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            {% if alat.foto %}
+                            <img src="{{ alat.foto.url }}" width="50" height="50" class="rounded object-fit-cover">
+                            {% else %}
+                            <span class="badge bg-secondary">Tanpa Foto</span>
+                            {% endif %}
+                        </td>
+                        <td class="fw-semibold">{{ alat.nama_alat }}</td>
+                        <td>{{ alat.kategori }}</td>
+                        <td>Rp {{ alat.harga_sewa }}</td>
+                        <td>{{ alat.stok }}</td>
+                        <td>
+                            <div class="hstack gap-1">
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEdit{{ alat.id }}">
+                                    Edit
+                                </button>
+                                <form action="{% url 'hapus_alat' alat.id %}" method="POST" onsubmit="return confirm('Hapus {{ alat.nama_alat }}?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <div class="modal fade" id="modalEdit{{ alat.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <form action="{% url 'edit_alat' alat.id %}" method="POST" enctype="multipart/form-data" class="modal-content">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Alat</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body vstack gap-3">
+                                    <div>
+                                        <label class="form-label">Nama Alat</label>
+                                        <input type="text" name="nama_alat" value="{{ alat.nama_alat }}" class="form-control" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Kategori</label>
+                                        <input type="text" name="kategori" value="{{ alat.kategori }}" list="listKategori" class="form-control" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Harga Sewa</label>
+                                        <input type="number" name="harga_sewa" value="{{ alat.harga_sewa }}" class="form-control" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Stok</label>
+                                        <input type="number" name="stok" value="{{ alat.stok }}" class="form-control" required>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">Ganti Foto (Opsional)</label>
+                                        <input type="file" name="foto" class="form-control" accept="image/*">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">Belum ada data alat.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<datalist id="listKategori">
+    {% for k in semua_kategori %}
+    <option value="{{ k }}">
+    {% endfor %}
+</datalist>
+
+<div class="modal fade" id="modalTambah" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{% url 'tambah_alat' %}" method="POST" enctype="multipart/form-data" class="modal-content">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Alat Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body vstack gap-3">
+                <div>
+                    <label class="form-label">Nama Alat</label>
+                    <input type="text" name="nama_alat" class="form-control" required>
+                </div>
+                <div>
+                    <label class="form-label">Kategori</label>
+                    <input type="text" name="kategori" list="listKategori" class="form-control" required>
+                </div>
+                <div>
+                    <label class="form-label">Harga Sewa</label>
+                    <input type="number" name="harga_sewa" class="form-control" required>
+                </div>
+                <div>
+                    <label class="form-label">Stok</label>
+                    <input type="number" name="stok" value="1" class="form-control" required>
+                </div>
+                <div>
+                    <label class="form-label">Foto Alat</label>
+                    <input type="file" name="foto" class="form-control" accept="image/*">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

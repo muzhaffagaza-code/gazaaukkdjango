@@ -1,0 +1,50 @@
+{% extends 'sewa/base.html' %}
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="fw-bold m-0 text-dark">+ Tambah Alat Baru</h5>
+            </div>
+
+            <div class="card-body p-4">
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary-subtle fw-bold">
+    &larr; Kembali
+</a>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nama Alat</label>
+                        <input type="text" name="nama_alat" required class="form-control">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Kategori</label>
+                        <input type="text" name="kategori" placeholder="Body/Targer" required class="form-control">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Harga Sewa / Hari</label>
+                            <input type="number" name="harga_sewa" required class="form-control">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Stok</label>
+                            <input type="number" name="stok" value="1" required class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Foto Alat</label>
+                        <input type="file" name="foto" accept="image/*" class="form-control">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">
+                        Simpan Alat Baru
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

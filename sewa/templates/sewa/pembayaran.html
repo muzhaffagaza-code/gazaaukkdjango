@@ -1,0 +1,67 @@
+{% extends 'sewa/base.html' %}
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-12 col-md-7 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold m-0">Konfirmasi Peminjaman</h5>
+                <small class="text-muted">Isi nama penyewa dan lama sewa sebelum konfirmasi.</small>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="bg-primary-subtle rounded p-3 mb-4 d-flex align-items-center gap-3">
+                    {% if alat.foto %}
+                        <img src="{{ alat.foto.url }}" alt="{{ alat.nama_alat }}" class="rounded border" style="width: 65px; height: 65px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary-subtle text-muted rounded d-flex align-items-center justify-content-center fw-bold small" style="width: 65px; height: 65px;">
+                            No Foto
+                        </div>
+                    {% endif %}
+                    <div>
+                        <span class="badge bg-primary mb-1">{{ alat.kategori }}</span>
+                        <h6 class="fw-bold m-0">{{ alat.nama_alat }}</h6>
+                        <span class="text-success fw-bold small">Rp {{ alat.harga_sewa }} / hari</span>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Nama Penyewa</label>
+                        <input type="text" name="nama_peminjam" placeholder="Masukkan nama lengkap" class="form-control" required autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Lama Sewa (Hari)</label>
+                        <input type="number" id="lama_sewa" name="lama_sewa" value="1" min="1" class="form-control" required>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top mb-4">
+                        <span class="text-muted fw-bold small">Estimasi Total Bayar:</span>
+                        <h4 id="total_bayar_text" class="text-success fw-bold m-0">Rp {{ alat.harga_sewa }}</h4>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="{% url 'katalog' %}" class="btn btn-secondary w-100 fw-bold">Batal</a>
+                        </div>
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">Konfirmasi Sewa</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const harga = Number("{{ alat.harga_sewa }}") || 0;
+    const inputLama = document.getElementById('lama_sewa');
+    const totalText = document.getElementById('total_bayar_text');
+
+    inputLama.addEventListener('input', function() {
+        const hari = Math.max(1, parseInt(this.value) || 1);
+        totalText.innerText = 'Rp ' + (harga * hari).toLocaleString('id-ID');
+    });
+</script>
+{% endblock %}

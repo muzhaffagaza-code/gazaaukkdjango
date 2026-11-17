@@ -1,0 +1,97 @@
+{% extends 'sewa/base.html' %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-2 border-bottom">
+    <div>
+        <h4 class="fw-bold m-0">Panel Admin</h4>
+        <small class="text-muted">Kelola peminjaman & inventaris alat</small>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        <span class="badge bg-primary-subtle text-primary p-2">{{ user.username }}</span>
+        <a href="{% url 'tambah_alat' %}" class="btn btn-success btn-sm fw-bold">+ Alat</a>
+        <a href="{% url 'logout' %}" class="btn btn-danger btn-sm fw-bold">Logout</a>
+    </div>
+</div>
+
+<div class="row g-2 mb-3 text-center">
+    <div class="col-4"><div class="card p-2 shadow-sm"><small class="text-muted">Total Alat</small><h4 class="text-primary fw-bold m-0">{{ total_alat }}</h4></div></div>
+    <div class="col-4"><div class="card p-2 shadow-sm"><small class="text-muted">Peminjaman</small><h4 class="text-success fw-bold m-0">{{ total_peminjaman }}</h4></div></div>
+    <div class="col-4"><div class="card p-2 shadow-sm h-100 justify-content-center"><a href="/admin/" target="_blank" class="text-decoration-none fw-bold small">Django Admin &rarr;</a></div></div>
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span class="fw-bold small">Daftar Peminjaman</span>
+        <form method="GET" class="d-flex gap-1">
+            <input type="hidden" name="q_alat" value="{{ q_alat }}">
+            <input type="text" name="q_pinjam" value="{{ q_pinjam }}" placeholder="Cari penyewa/alat..." class="form-control form-control-sm">
+            <button class="btn btn-primary btn-sm fw-bold">Cari</button>
+            {% if q_pinjam %}<a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">Reset</a>{% endif %}
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle m-0 small text-nowrap">
+            <thead class="table-light">
+                <tr><th>Penyewa</th><th>Alat</th><th>Lama</th><th>Total</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr>
+            </thead>
+            <tbody>
+                {% for item in semua_peminjaman %}
+                <tr>
+                    <td class="fw-bold">{{ item.nama_peminjam }}</td>
+                    <td>{{ item.alat.nama_alat }}</td>
+                    <td>{{ item.lama_sewa }} Hari</td>
+                    <td class="text-success fw-bold">Rp {{ item.total_bayar }}</td>
+                    <td>{{ item.tanggal_pinjam|date:"d M Y, H:i" }}</td>
+                    <td>
+                        {% if item.hari_telat > 0 %}<span class="badge bg-danger">Telat {{ item.hari_telat }} Hari (Rp {{ item.estimasi_denda }})</span>
+                        {% else %}<span class="badge bg-success">Aktif</span>{% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'kembalikan_alat' item.id %}" onclick="return confirm('Kembalikan?')" class="btn btn-info btn-sm text-white fw-bold">Kembalikan</a>
+                        <a href="{% url 'edit_peminjaman' item.id %}" class="btn btn-warning btn-sm fw-bold">Edit</a>
+                        <a href="{% url 'hapus_peminjaman' item.id %}" onclick="return confirm('Hapus?')" class="btn btn-danger btn-sm fw-bold">Hapus</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-3">Data peminjaman tidak ditemukan.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span class="fw-bold small">Daftar Inventaris Alat</span>
+        <form method="GET" class="d-flex gap-1">
+            <input type="hidden" name="q_pinjam" value="{{ q_pinjam }}">
+            <input type="text" name="q_alat" value="{{ q_alat }}" placeholder="Cari nama/kategori..." class="form-control form-control-sm">
+            <button class="btn btn-primary btn-sm fw-bold">Cari</button>
+            {% if q_alat %}<a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">Reset</a>{% endif %}
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle m-0 small text-nowrap">
+            <thead class="table-light">
+                <tr><th>Foto</th><th>Nama Alat</th><th>Kategori</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr>
+            </thead>
+            <tbody>
+                {% for alat in semua_alat %}
+                <tr>
+                    <td>{% if alat.foto %}<img src="{{ alat.foto.url }}" width="40" height="40" class="rounded object-fit-cover">{% else %}-{% endif %}</td>
+                    <td class="fw-bold">{{ alat.nama_alat }}</td>
+                    <td>{{ alat.kategori }}</td>
+                    <td class="text-primary fw-bold">Rp {{ alat.harga_sewa }}</td>
+                    <td><span class="badge {% if alat.stok > 0 %}bg-success{% else %}bg-danger{% endif %}">{{ alat.stok }} Unit</span></td>
+                    <td>
+                        <a href="{% url 'edit_alat' alat.id %}" class="btn btn-warning btn-sm fw-bold">Edit</a>
+                        <a href="{% url 'hapus_alat' alat.id %}" onclick="return confirm('Hapus?')" class="btn btn-danger btn-sm fw-bold">Hapus</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-3">Data alat tidak ditemukan.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

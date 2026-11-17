@@ -1,0 +1,43 @@
+{% extends 'sewa/base.html' %}
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-12 col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h6 class="fw-bold m-0">Edit Peminjaman #{{ peminjaman.id }}</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Nama Penyewa</label>
+                        <input type="text" value="{{ peminjaman.nama_peminjam }}" class="form-control bg-light text-muted" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Pilih Alat</label>
+                        <select name="alat" class="form-select">
+                            {% for a in daftar_alat %}
+                                <option value="{{ a.id }}" {% if a.id == peminjaman.alat.id %}selected{% endif %}>
+                                    {{ a.nama_alat }} - Rp {{ a.harga_sewa }}/hari
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Lama Sewa (Hari)</label>
+                        <input type="number" name="lama_sewa" value="{{ peminjaman.lama_sewa }}" min="1" class="form-control" required>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary w-100 fw-bold">Batal</a>
+                        </div>
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">Simpan</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

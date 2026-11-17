@@ -1,0 +1,29 @@
+{% extends 'sewa/base.html' %}
+{% block content %}
+<div class="row justify-content-center align-items-center my-4 my-md-5">
+    <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-3 p-sm-4">
+                <h5 class="fw-bold text-center mb-1">Login SewaAlat</h5>
+                <p class="text-muted small text-center mb-4">Masuk sebagai Admin atau Petugas</p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Username</label>
+                        <input type="text" name="username" class="form-control" required autofocus>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'katalog' %}" class="btn btn-secondary w-100 fw-bold">Batal</a>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
