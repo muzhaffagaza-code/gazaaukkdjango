@@ -12,7 +12,9 @@ urlpatterns = [
     path('alat/<int:pk>/edit/', views.edit_alat, name='edit_alat'),
     path('alat/<int:pk>/hapus/', views.hapus_alat, name='hapus_alat'),
     path('peminjaman/<int:pk>/edit/', views.edit_peminjaman, name='edit_peminjaman'),
+    path('peminjaman/<int:pk>/konfirmasi/', views.konfirmasi_peminjaman, name='konfirmasi_peminjaman'),
     path('peminjaman/<int:pk>/kembalikan/', views.kembalikan_alat, name='kembalikan_alat'),
     path('peminjaman/<int:pk>/hapus/', views.hapus_peminjaman, name='hapus_peminjaman'),
+    path('cetak-laporan/', views.cetak_laporan, name='cetak_laporan'),
     path('logout/', views.logout_view, name='logout'),
 ]

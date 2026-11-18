@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Peminjaman Alat - SewaAlat</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <style>
+        @media print {
+            .d-print-none { display: none !important; }
+            body { margin: 0; padding: 0; font-size: 12px; }
+        }
+    </style>
+</head>
+<body class="bg-white text-dark p-4" onload="window.print()">
+
+    <div class="alert alert-light border d-flex justify-content-between align-items-center mb-4 d-print-none">
+        <span class="small text-muted fw-bold">Pratinjau Cetak Laporan</span>
+        <div>
+            <button onclick="window.print()" class="btn btn-success btn-sm fw-bold">Cetak / Simpan PDF</button>
+            <a href="{% url 'petugas_dashboard' %}" class="btn btn-secondary btn-sm fw-bold ms-1">Kembali ke Dashboard</a>
+        </div>
+    </div>
+
+    <div class="text-center border-bottom border-3 border-dark pb-2 mb-3">
+        <h4 class="fw-bold text-uppercase mb-1">LAPORAN TRANSAKSI PEMINJAMAN ALAT TAEKWONDO</h4>
+        <p class="mb-0 small">Sistem Informasi Manajemen SewaAlat (Database: db_peminjaman)</p>
+    </div>
+
+    <div class="d-flex justify-content-between small mb-3">
+        <div>
+            <strong>Dicetak oleh:</strong> {{ pencetak|title }}<br>
+            <strong>Total Data Alat:</strong> {{ total_alat }} Item
+        </div>
+        <div class="text-end">
+            <strong>Tanggal Cetak:</strong> {{ waktu_cetak|date:"d M Y, H:i" }} WIB<br>
+            <strong>Jumlah Transaksi:</strong> {{ semua_peminjaman.count }} Transaksi
+        </div>
+    </div>
+
+    <table class="table table-bordered border-dark table-sm align-middle small">
+        <thead class="table-light border-dark text-center">
+            <tr>
+                <th width="4%">No</th>
+                <th>Nama Peminjam</th>
+                <th>Nama Alat</th>
+                <th>Tanggal Pinjam</th>
+                <th width="8%">Lama</th>
+                <th>Total Sewa</th>
+                <th>Status / Telat</th>
+                <th>Est. Denda</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in semua_peminjaman %}
+            <tr>
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td>{{ p.nama_peminjam }}</td>
+                <td>{{ p.alat.nama_alat }} ({{ p.alat.kategori }})</td>
+                <td class="text-center">{{ p.tanggal_pinjam|date:"d/m/Y H:i" }}</td>
+                <td class="text-center">{{ p.lama_sewa }} Hari</td>
+                <td class="text-end">Rp {{ p.total_bayar }}</td>
+                <td class="text-center">
+                    {% if p.hari_telat > 0 %}
+                        Telat {{ p.hari_telat }} hari
+                    {% else %}
+                        Aktif ({{ p.status_pembayaran }})
+                    {% endif %}
+                </td>
+                <td class="text-end">Rp {{ p.estimasi_denda }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center py-3">Tidak ada data peminjaman aktif.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot class="table-light border-dark fw-bold">
+            <tr>
+                <td colspan="5" class="text-end">TOTAL KESELURUHAN</td>
+                <td class="text-end">Rp {{ total_pendapatan }}</td>
+                <td></td>
+                <td class="text-end">Rp {{ total_denda }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="row mt-4">
+        <div class="col-7"></div>
+        <div class="col-5 text-center small">
+            <p class="mb-5">Semarang, {{ waktu_cetak|date:"d F Y" }}<br>Mengetahui, Petugas / Admin</p>
+            <p class="fw-bold mt-4 mb-0">( {{ pencetak|title }} )</p>
+        </div>
+    </div>
+
+</body>
+</html>

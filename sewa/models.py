@@ -14,6 +14,10 @@ class Alat(models.Model):
 
 
 class Peminjaman(models.Model):
+    STATUS_CHOICES = (
+        ('Menunggu', 'Menunggu Konfirmasi'),
+        ('Aktif', 'Aktif / Dipinjam'),
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     nama_peminjam = models.CharField(max_length=100, default='Umum')
     alat = models.ForeignKey(Alat, on_delete=models.CASCADE)
@@ -21,9 +25,11 @@ class Peminjaman(models.Model):
     total_bayar = models.IntegerField(default=0)
     tanggal_pinjam = models.DateTimeField(auto_now_add=True)
     status_pembayaran = models.CharField(max_length=20, default='Lunas')
+    status_peminjaman = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Menunggu')
 
     def __str__(self):
         return f"{self.user.username} - {self.alat.nama_alat}"
+
 
 class Profil(models.Model):
     ROLE_CHOICES = (

@@ -38,9 +38,15 @@ def proses_pembayaran(request, alat_id):
     if request.method == 'POST' and alat.stok > 0:
         lama = int(request.POST.get('lama_sewa', 1))
         penyewa = request.user if request.user.is_authenticated else User.objects.filter(is_superuser=True).first()
-        Peminjaman.objects.create(user=penyewa, nama_peminjam=request.POST.get('nama_peminjam'), alat=alat, lama_sewa=lama, total_bayar=alat.harga_sewa * lama)
-        alat.stok -= 1
-        alat.save()
+        Peminjaman.objects.create(
+            user=penyewa,
+            nama_peminjam=request.POST.get('nama_peminjam'),
+            alat=alat,
+            lama_sewa=lama,
+            total_bayar=alat.harga_sewa * lama,
+            status_peminjaman='Menunggu'
+        )
+        messages.success(request, 'Pengajuan sewa berhasil dikirim! Menunggu konfirmasi petugas.')
         return redirect('riwayat_sewa')
     return render(request, 'sewa/pembayaran.html', {'alat': alat})
 
@@ -61,7 +67,10 @@ def data_dashboard(request):
         alat = alat.filter(nama_alat__icontains=q_alat) | alat.filter(kategori__icontains=q_alat)
 
     for item in peminjaman:
-        item.hari_telat = max(0, (timezone.now() - item.tanggal_pinjam).days - item.lama_sewa)
+        if item.status_peminjaman == 'Aktif':
+            item.hari_telat = max(0, (timezone.now() - item.tanggal_pinjam).days - item.lama_sewa)
+        else:
+            item.hari_telat = 0
         item.estimasi_denda = item.hari_telat * 1000
 
     return {'semua_peminjaman': peminjaman, 'semua_alat': alat, 'total_alat': Alat.objects.count(), 'total_peminjaman': Peminjaman.objects.count(), 'q_pinjam': q_pinjam, 'q_alat': q_alat}
@@ -121,6 +130,22 @@ def edit_peminjaman(request, pk):
 
 
 @login_required(login_url='login')
+def konfirmasi_peminjaman(request, pk):
+    peminjaman = get_object_or_404(Peminjaman, pk=pk)
+    if peminjaman.status_peminjaman == 'Menunggu':
+        if peminjaman.alat.stok > 0:
+            peminjaman.status_peminjaman = 'Aktif'
+            peminjaman.tanggal_pinjam = timezone.now()
+            peminjaman.save()
+            peminjaman.alat.stok -= 1
+            peminjaman.alat.save()
+            messages.success(request, f"Peminjaman atas nama {peminjaman.nama_peminjam} telah dikonfirmasi & aktif.")
+        else:
+            messages.error(request, "Gagal konfirmasi: Stok alat sudah habis!")
+    return ke_dashboard(request.user)
+
+
+@login_required(login_url='login')
 def kembalikan_alat(request, pk):
     peminjaman = get_object_or_404(Peminjaman, pk=pk)
     telat = max(0, (timezone.now() - peminjaman.tanggal_pinjam).days - peminjaman.lama_sewa)
@@ -138,6 +163,32 @@ def hapus_peminjaman(request, pk):
     return redirect('admin_dashboard')
 
 
+@login_required(login_url='login')
+def cetak_laporan(request):
+    q_pinjam = request.GET.get('q_pinjam', '')
+    peminjaman = Peminjaman.objects.all().order_by('-tanggal_pinjam')
+    if q_pinjam:
+        peminjaman = peminjaman.filter(nama_peminjam__icontains=q_pinjam) | peminjaman.filter(alat__nama_alat__icontains=q_pinjam)
+
+    total_pendapatan = 0
+    total_denda = 0
+    for item in peminjaman:
+        if item.status_peminjaman == 'Aktif':
+            item.hari_telat = max(0, (timezone.now() - item.tanggal_pinjam).days - item.lama_sewa)
+        else:
+            item.hari_telat = 0
+        item.estimasi_denda = item.hari_telat * 1000
+        total_pendapatan += item.total_bayar
+        total_denda += item.estimasi_denda
+
+    return render(request, 'sewa/cetak_laporan.html', {
+        'semua_peminjaman': peminjaman,
+        'total_alat': Alat.objects.count(),
+        'waktu_cetak': timezone.now(),
+        'pencetak': request.user.username,
+        'total_pendapatan': total_pendapatan,
+        'total_denda': total_denda,
+    })
 def logout_view(request):
     logout(request)
     return redirect('katalog')
